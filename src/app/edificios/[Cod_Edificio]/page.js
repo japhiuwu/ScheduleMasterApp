@@ -11,6 +11,7 @@ export default function Home(props) {
 
   useEffect(() => {
     GetAulas(Cod_Edificio).then((data) => {
+      
       setData(data);
       console.log(data);
       setLoading(false);

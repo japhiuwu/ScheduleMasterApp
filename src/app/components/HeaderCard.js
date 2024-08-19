@@ -7,7 +7,7 @@ const HeaderCard = ({ titleHeader, background, description }) => {
         <h2 className="text-3xl font-bold text-gray-700">
           {titleHeader}
         </h2>
-        <p className="text-gray-600">
+        <p className="text-gray-600 mt-1">
           {description}
         </p>
       </div>

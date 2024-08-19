@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@headlessui/react": "^2.1.2",
+    "@heroicons/react": "^2.1.5",
     "@radix-ui/react-avatar": "^1.1.0",
     "bootstrap-icons": "^1.11.3",
     "class-variance-authority": "^0.7.0",

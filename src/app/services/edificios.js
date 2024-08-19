@@ -35,13 +35,14 @@ export async function GetAulas(id) {
     return data;
 }
 
-export async function GetAula(Cod_Edificio, Num_Aula) {
-    const response = await fetch(`${ settings.domain }/edificios/${Cod_Edificio}/aulas/${Num_Aula}`,{
+export async function GetAula(Cod_Edificio, Num_Aula, term) {
+    const response = await fetch(`${ settings.domain }/edificios/${Cod_Edificio}/aulas/${Num_Aula}/term/${term}`,{
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
             , 'Cache-Control': 'no-cache'
         }
+        
     });
 
     if (!response.ok) {
