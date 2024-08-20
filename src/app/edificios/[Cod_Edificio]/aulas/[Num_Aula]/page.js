@@ -10,7 +10,15 @@ export default function Home(props) {
   const [loading, setLoading] = useState(true);
   const [periodo, setPeriodo] = useState('Periodo 0');
   const { Cod_Edificio, Num_Aula } = props.params;
+
   const storedTerm = localStorage.getItem('selectedTerm');
+  const message = sessionStorage.getItem('deleteMessage');
+  
+  if (message) {
+    alert(message); 
+    console.log(message)
+    sessionStorage.removeItem('deleteMessage'); 
+  }
 
     useEffect(() => {
       GetAula(Cod_Edificio,Num_Aula,storedTerm).then((data) => {
@@ -33,7 +41,7 @@ export default function Home(props) {
           className={`${section.Nombre_Clase}`}
           subtitle={`Dias ${section.Dias} - ${section.Cupos} Cupos`}
           description={`Docente ${section.Nombre_Docente} ${section.Apellido_Docente}`}
-          url={`/carrera/${section.Cod_Carrera}/clase/${section.Cod_Clase}/seccion/${section.Cod_Seccion}`}
+          url={`/facultades/${section.Cod_Facultad}/carrera/${section.Cod_Carrera}/clase/${section.Cod_Clase}/seccion/${section.Cod_Seccion}`}
         />
       ))
     ) : (

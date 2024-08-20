@@ -2,7 +2,7 @@ import MenuLateral from "./MenuLateral";
 import Header from "../components/Header";
 import HeaderCard from "../components/HeaderCard";
 
-export default function Template({ title, img, initials, children, titleHeader, description }) {
+export default function Template({ title, img, initials, children, titleHeader, description, link }) {
   return (
     <div className="flex h-screen bg-white">
       <MenuLateral />
@@ -24,7 +24,7 @@ export default function Template({ title, img, initials, children, titleHeader, 
           <HeaderCard
             titleHeader={titleHeader}
             description={description}
-            
+            link={link}
           />
           {children}
         </div>

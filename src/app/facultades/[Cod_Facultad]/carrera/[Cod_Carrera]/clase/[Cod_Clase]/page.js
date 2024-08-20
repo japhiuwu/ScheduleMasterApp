@@ -9,8 +9,15 @@ export default function Home(props) {
   const [loading, setLoading] = useState(true);
     const { Cod_Facultad, Cod_Carrera, Cod_Clase } = props.params;
     const [clase, setClase] = useState('Nombre de la clase');
-    const [periodo, setPeriodo] = useState('Periodo 0');
+    
     const storedTerm = localStorage.getItem('selectedTerm');
+    const message = sessionStorage.getItem('deleteMessage');
+
+    if (message) {
+        alert(message); 
+        console.log(message)
+        sessionStorage.removeItem('deleteMessage'); 
+    }
 
     useEffect(() => {
       GetClase(Cod_Facultad, Cod_Carrera, Cod_Clase, storedTerm).then((secciones) => {
@@ -25,6 +32,7 @@ export default function Home(props) {
     title={`${Cod_Carrera}-${Cod_Clase} `}
     titleHeader={clase}
     description={`${Cod_Carrera}-${Cod_Clase} | ${storedTerm}`}
+    link={`./${Cod_Clase}/seccion`}
     >
       {data.map((section) => (
         <CourseCard

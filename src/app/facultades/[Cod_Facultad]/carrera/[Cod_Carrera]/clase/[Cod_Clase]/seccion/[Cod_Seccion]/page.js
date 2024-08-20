@@ -4,32 +4,95 @@ import React, { useEffect, useState } from "react";
 import { GetSeccion } from "../../../../../../../../services/facultades";
 import { GetEdificios, GetAulas} from "../../../../../../../../services/edificios";
 import { GetDocentes } from "../../../../../../../../services/extras";
+import { DeleteSection, UpdateSection, CreateSection } from "../../../../../../../../services/secciones"
 
 import AlertModal from "../../../../../../../../components/AlertModal";
 import Template from "../../../../../../../../components/Template";
+import SectionForm from "../../../../../../../../components/SectionForm";
+import InformationToast from "../../../../../../../../components/InformationToast";
+
+import { useRouter } from 'next/navigation';
+    
 
 export default function Home(props) {
   const [data, setData] = useState({});
+  const router = useRouter()
   const [loading, setLoading] = useState(true);
   const [docentes, setDocentes] = useState([]);
   const [edificios, setEdificios] = useState([]);
   const [aulas, setAulas] = useState([]);
   const [open, setOpen] = useState(false);
-
+  const [clase, setClase] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
+  const [status, setStatus] = useState('');
+  const [informationMessage, setInformationMessage] = useState('');
   const storedTerm = localStorage.getItem('selectedTerm');
   const { Cod_Facultad, Cod_Carrera, Cod_Clase, Cod_Seccion } = props.params;
 
+  const [formData, setFormData] = useState({});
+  const [diasSeleccionados, setDiasSeleccionados] = useState(data.Dias || '');
+  
+
   const deleteAction = () => {
-    DeleteSection(Term, Cod_Carrera, Cod_Clase, Cod_Seccion).then( (response) => {
-        if( response.status != 200 ){            
+    DeleteSection(storedTerm, Cod_Carrera, Cod_Clase, Cod_Seccion).then( (response) => {
+        if( response.status != 200 ){ 
+            console.log(response.status)   
+            setStatus('warning');        
             setInformationMessage('Error with API call server communication');
-            setOpen(false);
+            setTimeout(() => {
+              setStatus('');
+            }, 5000); 
             return;
         }else{
-            router.push('/');
+            /* sessionStorage.setItem('message', 'El elemento se ha eliminado con éxito.'); */
+            setStatus('success'); 
+            setInformationMessage('Se ha eliminado con éxito');
+            setTimeout(() => {
+              router.back();
+            }, 5000); 
         }
     });
 }
+
+const updateAction = () => {
+  if(formData.Dias != null){
+    UpdateSection(storedTerm, Cod_Carrera, Cod_Clase, Cod_Seccion, formData).then( (response) => {
+      if( response.status != 200 ){   
+          console.log(response.status)     
+          setStatus('warning');       
+          setInformationMessage('Error with API call server communication');
+          setTimeout(() => {
+            setStatus('');
+          }, 5000); 
+          return;
+      }else{
+          setStatus('success'); 
+          console.log(response.status)
+          setInformationMessage('Se ha actualizado con éxito');
+          setTimeout(() => {
+            router.back();
+          }, 5000); 
+          return;
+      }
+  });
+  } else{
+    setStatus('warning');       
+    setInformationMessage('Debes escoger al menos un dia');
+    setTimeout(() => {
+      setStatus('');
+    }, 5000); 
+    return;
+  }
+  
+}
+
+const handleEdificioChange = (event) => {
+  const selectedEdificio = event.target.value;
+  setData(prevData => ({
+    ...prevData,
+    Cod_Edificio: selectedEdificio
+  }));
+};
 
 const closeConfirmation = () => {
     setOpen(false);
@@ -39,6 +102,34 @@ const handleDeleteClick = (e) => {
     e.preventDefault();
     setOpen(true);
 }
+
+const handleUpdateClick = (e) => {
+  e.preventDefault();
+  updateAction();
+}
+
+const handleInputChange = (e) => {
+  const { id, value, type, checked } = e.target;
+
+  setFormData((prevData) => ({
+    ...prevData,
+    [id]: type === 'checkbox' ? checked : value
+  }));
+};
+
+const handleCheckboxChange = (e) => {
+/*   const { id, checked } = e.target;
+  setDiasSeleccionados((prevDias) => {
+    const diasArray = prevDias.split(''); // Convertir cadena en array
+    if (checked) {
+      return [...diasArray, id].sort().join(''); // Agregar el nuevo valor y ordenar
+    } else {
+      return diasArray.filter((dia) => dia !== id).join(''); // Eliminar el valor
+    }
+  });
+  console.log(diasSeleccionados) */
+};
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,6 +141,9 @@ const handleDeleteClick = (e) => {
           Cod_Seccion
         );
         setData(seccion[0] || {});
+        setClase(seccion[0].Nombre_Clase);
+        setFormData(seccion[0] || {});
+
         const docentesData = await GetDocentes(Cod_Carrera);
         setDocentes(docentesData || []);
         const edificiosData = await GetEdificios();
@@ -62,7 +156,7 @@ const handleDeleteClick = (e) => {
     };
 
     fetchData();
-  }, [Cod_Facultad, Cod_Carrera, Cod_Clase, Cod_Seccion]);
+  }, [Cod_Facultad, Cod_Carrera, Cod_Clase, Cod_Seccion, data.Nombre_Clase]);
 
   useEffect(() => {
     if (data.Cod_Edificio) {
@@ -74,18 +168,19 @@ const handleDeleteClick = (e) => {
           console.error("Error fetching aulas:", error);
         });
     }
-  }, [data.Cod_Edificio]);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  }, [data.Cod_Edificio]);  
 
   return (
     <Template
       title={`${Cod_Seccion} ${Cod_Carrera}-${Cod_Clase}`}
       titleHeader={`${Cod_Seccion} ${Cod_Carrera}-${Cod_Clase}`}
-      subtitulo={`${Cod_Seccion} ${Cod_Carrera}-${Cod_Clase} ${data.Nombre_Clase}`}
+      subtitulo={`${Cod_Seccion} ${Cod_Carrera}-${Cod_Clase} ${clase}`}
     >
+      <InformationToast 
+        message={informationMessage}
+        status={status}
+        setStatus={setStatus}
+      />
       <AlertModal
       title="Borrar Sección"
         description="¿Está seguro que desea borrar esta sección?"
@@ -93,293 +188,33 @@ const handleDeleteClick = (e) => {
         open={open}
         closeConfirmation={closeConfirmation}
       />
-      <form className="mb">
-        <div className="grid gap-6 mb-6 md:grid-cols-2">
-          <div>
-            <label
-              htmlFor="section"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Sección
-            </label>
-            <input
-              type="number"
-              id="section"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              value={Cod_Seccion}
-              required
-              disabled
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="classCode"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Código de la Clase
-            </label>
-            <input
-              type="text"
-              id="classCode"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              value={`${Cod_Carrera}-${Cod_Clase}`}
-              disabled
-              required
-            />
-          </div>
-        </div>
-        <div className="mb-6">
-          <label
-            htmlFor="teachers"
-            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-          >
-            Docente Asignado
-          </label>
-          <select
-            id="teachers"
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          >
-            {docentes.map((docente) => (
-              <option
-                value={docente.Num_Empleado}
-                key={docente.Num_Empleado}
-                selected={docente.Num_Empleado === data.Num_Empleado}
-              >
-                {`${docente.Primer_Nombre} ${docente.Primer_Apellido}`}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="grid gap-6 mb-6 md:grid-cols-2">
-          <div>
-            <label
-              htmlFor="buildings"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Edificio
-            </label>
-            <select
-              id="buildings"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            >
-              {edificios.map((edificio) => (
-                <option
-                  value={edificio.Cod_Edificio}
-                  key={edificio.Cod_Edificio}
-                  selected={edificio.Cod_Edificio === data.Cod_Edificio}
-                >
-                  {edificio.Nombre}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label
-              htmlFor="classroom"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Aula
-            </label>
-            <select
-              id="classroom"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            >
-              {aulas.map((aula) => (
-                <option
-                  value={aula.Num_Aula}
-                  key={aula.Num_Aula}
-                  selected={aula.Num_Aula === data.Num_Aula}
-                >
-                  {aula.Num_Aula}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label
-              htmlFor="start"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Hora Inicial
-            </label>
-            <input
-              type="time"
-              id="start"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"              
-              value={data.Hora_Inicial}
-              required
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="end"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Hora Final
-            </label>
-            <input
-              type="time"
-              id="end"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"              
-              value={data.Hora_Final}
-              required
-            />
-          </div>
-        </div>
-        <div className="grid gap-6 mb-6 md:grid-cols-2">
-          <div className="mb-6">
-            <label
-              htmlFor="end"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Días
-            </label>
-            <ul className="w-48 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-              <li className="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600">
-                <div className="flex items-center ps-3">
-                  <input
-                    id="Lu"
-                    type="checkbox"
-                    value="Lu"
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                  />
-                  <label
-                    htmlFor="Lu"
-                    className="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                  >
-                    Lunes
-                  </label>
-                </div>
-              </li>
-              <li className="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600">
-                <div className="flex items-center ps-3">
-                  <input
-                    id="Ma"
-                    type="checkbox"
-                    value="Ma"
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                  />
-                  <label
-                    htmlFor="Ma"
-                    className="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                  >
-                    Martes
-                  </label>
-                </div>
-              </li>
-              <li className="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600">
-                <div className="flex items-center ps-3">
-                  <input
-                    id="Mi"
-                    type="checkbox"
-                    value="Mi"
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                  />
-                  <label
-                    htmlFor="Mi"
-                    className="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                  >
-                    Miércoles
-                  </label>
-                </div>
-              </li>
-              <li className="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600">
-                <div className="flex items-center ps-3">
-                  <input
-                    id="Ju"
-                    type="checkbox"
-                    value="Ju"
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                  />
-                  <label
-                    htmlFor="Ju"
-                    className="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                  >
-                    Jueves
-                  </label>
-                </div>
-              </li>
-              <li className="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600">
-                <div className="flex items-center ps-3">
-                  <input
-                    id="Vi"
-                    type="checkbox"
-                    value="Vi"
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                  />
-                  <label
-                    htmlFor="Vi"
-                    className="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                  >
-                    Viernes
-                  </label>
-                </div>
-              </li>
-              <li className="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600">
-                <div className="flex items-center ps-3">
-                  <input
-                    id="Sa"
-                    type="checkbox"
-                    value="Sa"
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                  />
-                  <label
-                    htmlFor="Sa"
-                    className="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                  >
-                    Sábado
-                  </label>
-                </div>
-              </li>
-              <li className="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600">
-                <div className="flex items-center ps-3">
-                  <input
-                    id="Do"
-                    type="checkbox"
-                    value="Do"
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                  />
-                  <label
-                    htmlFor="Do"
-                    className="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                  >
-                    Domingo
-                  </label>
-                </div>
-              </li>
-            </ul>
-          </div>
-          <div className="mb-6">
-            <label
-              htmlFor="quotas"
-              className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-            >
-              Cupos
-            </label>
-            <input
-              type="number"
-              id="quotas"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"              
-              value={data.Cupos}
-              required
-            />
-          </div>
-        </div>
 
-        <button
-                type="button"
-                onClick={handleDeleteClick}
-                className="text-white mb-6 mr-2 bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
-              >
-                Delete
-              </button>
-        <button
-          type="submit"
-          className="text-white mb-6 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-        >
-          Editar
-        </button>
-      </form>
+      {!loading && (
+        <SectionForm
+          formData={formData}
+          Cod_Carrera={Cod_Carrera}
+          Cod_Clase={Cod_Clase}
+          handleDeleteClick={handleDeleteClick}
+          handleUpdateClick={handleUpdateClick}
+          handleInputChange={handleInputChange}
+          handleCheckboxChange={handleCheckboxChange}
+          handleEdificioChange={handleEdificioChange}
+          docentes={docentes}
+          edificios={edificios}
+          aulas={aulas}
+          data={data}
+          isCreating={isCreating}
+        />
+      )}
+      {loading && (
+            <div role="status" className="animate-pulse mt-6">
+              <h3 className="h-3 bg-gray-300 rounded-full  w-48 mb-4" />
+              <p className="h-2 bg-gray-300 rounded-full w-[380px] mb-2.5" />
+              <p className="h-2 bg-gray-300 rounded-full w-[340px] mb-2.5" />
+              <p className="h-2 bg-gray-300 rounded-full w-[320px] mb-2.5" />
+            </div>
+      )}
+
     </Template>
   );
 }
