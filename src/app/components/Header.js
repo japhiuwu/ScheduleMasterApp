@@ -31,18 +31,19 @@ const Header = ({ title, img, initials }) => {
   };
 
   return (
-    <header className="bg-white mb-2">
-      <div className="mx-auto flex h-12 max-w-screen-xl items-center justify-between pr-3 pl-16">
-
+    <header className="bg-white mb-2 mx-2 pl-16">
+      <div className="mx-auto flex h-12 max-w-screen-xl items-center justify-between">
+        
         {/* Título centrado */}
-        <div className="ml-6">
+        <div className="flex-1 flex">
           <span className="text-md text-gray-800">{title}</span>
         </div>
         
-        <form className="max-w-sm mx-auto">
+        {/* Selector de términos centrado */}
+        <form className="w-40 justify-center">
           <select
-            id="countries"
-            className="bg-gray-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            id="terms"
+            className="bg-gray-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full max-w-sm p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             value={selectedTerm} // Set the value from state
             onChange={handleTermChange} // Handle change events
           >
@@ -56,7 +57,7 @@ const Header = ({ title, img, initials }) => {
         </form>
 
         {/* IM a la derecha */}
-        <div className="inline-flex items-center justify-center">
+        <div className="flex-1 flex justify-end">
           <Avatar>
             <AvatarImage src={img} />
             <AvatarFallback>{initials}</AvatarFallback>

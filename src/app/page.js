@@ -1,18 +1,21 @@
-import Image from "next/image";
-import HeaderCard from "./components/HeaderCard";
-import MenuLateral from "./components/MenuLateral";
-import Header from "./components/Header";
+"use client";
+import { useEffect } from "react";
+import { useAppContext } from "./context/AppContext";
 import MenuCard from "./components/MenuCard";
-import Template from "./components/Template";
 
 export default function Home() {
+  const { setTitle, setSubtitle,setShowMenu } = useAppContext();
+
+  useEffect(() => {
+    setTitle("Inicio");
+    setSubtitle("¿Cómo desea trabajar hoy?");
+    setShowMenu(true);
+  }, [setTitle, setSubtitle, setShowMenu]);
+
   return (
-    <Template
-    subtitulo="¿Cómo desea trabajar hoy?"
-    title="Inicio"
-    >
-      <MenuCard name="Aula" description="Visualizar por Aula" url="/edificios"/>
-      <MenuCard name="Carrera" description="Visualizar por Carrera" url="/facultades"/>
-    </Template>
+    <div className="flex flex-row">
+      <MenuCard name="Aula" description="Visualizar por Aula" url="/edificios" />
+      <MenuCard name="Carrera" description="Visualizar por Carrera" url="/facultades" />
+    </div>
   );
 }

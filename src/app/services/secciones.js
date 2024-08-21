@@ -36,11 +36,11 @@ export async function UpdateSection(Cod_Periodo, Cod_Carrera, Cod_Clase, Cod_Sec
         return response.json();
 };
 
-export async function CreateSection(Cod_Perdiodo, Cod_Carrera, Cod_Clase, Seccion) {
+export async function CreateSection(Seccion) {
     Seccion.Portada ='';
     Seccion.Dias = '';
     console.log(JSON.stringify(Seccion));
-    const response = await fetch(`${ settings.domain }/term/${Cod_Perdiodo}/carrera/${Cod_Carrera}/clase/${Cod_Clase}/seccion`,{
+    const response = await fetch(`${ settings.domain }/seccion`,{
         method: 'POST',
         body: JSON.stringify(Seccion),
         headers: {
@@ -50,8 +50,9 @@ export async function CreateSection(Cod_Perdiodo, Cod_Carrera, Cod_Clase, Seccio
         }
     });
 
-    if (!response.ok)
+    if (!response.ok){
         throw new HTTPError(response);
+        console.log(response)}
     else
         return response.json();
 };

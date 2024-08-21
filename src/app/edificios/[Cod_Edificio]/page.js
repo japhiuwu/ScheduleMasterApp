@@ -2,24 +2,29 @@
 import React, { useEffect, useState } from "react";
 import { GetAulas } from "../../services/edificios";
 import MenuCard from "../../components/MenuCard";
-import Template from "../../components/Template";
+import { useAppContext } from "../../context/AppContext";
 
 export default function Home(props) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const { Cod_Edificio } = props.params;
+  const { setTitle, setSubtitle,setShowMenu } = useAppContext();
+
+  useEffect(() => {
+    setTitle(Cod_Edificio);
+    setSubtitle("Escoja un Aula");
+    setShowMenu(true);
+  }, [setTitle, setSubtitle, setShowMenu, Cod_Edificio]);
 
   useEffect(() => {
     GetAulas(Cod_Edificio).then((data) => {
-      
       setData(data);
-      console.log(data);
       setLoading(false);
     });
   }, [Cod_Edificio]);
 
   return (
-    <Template subtitulo={"Escoja un Aula"}>
+    <>
       {data.map((aula) => (
         <MenuCard
           key={aula.Num_Aula}
@@ -28,6 +33,6 @@ export default function Home(props) {
           description={`${aula.Cod_Edificio} | ${aula.Tipo}`}
         />
       ))}
-    </Template>
+    </>
   );
 }

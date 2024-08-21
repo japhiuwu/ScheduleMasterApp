@@ -3,8 +3,8 @@ import Link from 'next/link';
 
 const MenuCard = ({icon, name, url, description}) => {
   return (
-    <button className="p-6 w-48 justify-center rounded-lg h-48 flex bg-gray-200 items-center mx-4 my-2 hover:bg-blue-200">
-        <Link href={url}>
+    <Link href={url}>
+      <button className="p-6 w-48 justify-center rounded-lg h-48 flex bg-gray-200 items-center mx-4 my-2 hover:bg-blue-200">
             <div className="flex flex-col justify-center items-center">
                 <div className="mb-2 rounded-lg">
                 <svg className="w-12 h-12 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
@@ -16,8 +16,8 @@ const MenuCard = ({icon, name, url, description}) => {
                 <p className="text-gray-400 text-xs">{description}</p>
                 </div>
             </div>
-        </Link>
-    </button>
+      </button>
+    </Link>
   );
 };
 

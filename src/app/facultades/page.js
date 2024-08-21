@@ -1,14 +1,20 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { GetFacultades } from "../services/facultades";
-import MenuLateral from "../components/MenuLateral";
-import Header from "../components/Header";
 import MenuCard from "../components/MenuCard";
 import Template from "../components/Template";
+import { useAppContext } from "../context/AppContext";
 
 export default function Home() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const { setTitle, setSubtitle } = useAppContext();
+
+  useEffect(() => {
+    setTitle("Facultades");
+    setSubtitle("Escoja una Facultad");
+  }, [setTitle, setSubtitle]);
 
   useEffect(() => {
     GetFacultades().then((data) => {
@@ -16,9 +22,10 @@ export default function Home() {
       setLoading(false);
     });
   }, []);
+  
 
   return (
-    <Template subtitulo={"Escoja una facultad"}>
+    <div className="flex flex-row flex-wrap justify-center w-auto">
       {data.map((facultad) => (
         <MenuCard
           key={facultad.Cod_Facultad}
@@ -28,6 +35,6 @@ export default function Home() {
           icon={facultad.portada}
         />
       ))}
-    </Template>
+    </div>
   );
 }

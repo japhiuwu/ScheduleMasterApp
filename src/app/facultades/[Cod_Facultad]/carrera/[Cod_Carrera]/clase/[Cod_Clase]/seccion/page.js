@@ -58,6 +58,13 @@ export default function Home(props) {
 
     // Llamada a la función de creación si todos los campos están llenos
     CreateSection(storedTerm, Cod_Carrera, Cod_Clase, formData).then(response => {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        Cod_Carrera: Cod_Carrera,
+        Cod_Clase: Cod_Clase,
+        Cod_Periodo: storedTerm
+      }));
+      console.log(formData)
         if (response.status !== 200) {
             console.log(response.status);
             setStatus('warning');

@@ -4,12 +4,12 @@ import React, { useEffect, useState } from "react";
 import { GetSeccion } from "../../../../../../../../services/facultades";
 import { GetEdificios, GetAulas} from "../../../../../../../../services/edificios";
 import { GetDocentes } from "../../../../../../../../services/extras";
-import { DeleteSection, UpdateSection, CreateSection } from "../../../../../../../../services/secciones"
+import { DeleteSection, UpdateSection } from "../../../../../../../../services/secciones"
 
 import AlertModal from "../../../../../../../../components/AlertModal";
-import Template from "../../../../../../../../components/Template";
+import { useAppContext } from "../../../../../../../../context/AppContext";
 import SectionForm from "../../../../../../../../components/SectionForm";
-import InformationToast from "../../../../../../../../components/InformationToast";
+
 
 import { useRouter } from 'next/navigation';
     
@@ -24,8 +24,18 @@ export default function Home(props) {
   const [open, setOpen] = useState(false);
   const [clase, setClase] = useState('');
   const [isCreating, setIsCreating] = useState(false);
-  const [status, setStatus] = useState('');
-  const [informationMessage, setInformationMessage] = useState('');
+  const { setTitle, setShowMenu, setBanner, setTitleBanner, setDescriptionBanner, setSubtitle } = useAppContext();
+
+/*   title={}
+      titleHeader={`${Cod_Seccion} ${Cod_Carrera}-${Cod_Clase}`}
+      subtitulo={`${Cod_Seccion} ${Cod_Carrera}-${Cod_Clase} ${clase}`} */
+
+  useEffect(()=>{
+    setBanner(false);
+    setTitle(`${Cod_Seccion} ${Cod_Carrera}-${Cod_Clase}`);
+    setSubtitle(`${Cod_Seccion} ${Cod_Carrera}-${Cod_Clase} ${clase}`);
+  })
+
   const storedTerm = localStorage.getItem('selectedTerm');
   const { Cod_Facultad, Cod_Carrera, Cod_Clase, Cod_Seccion } = props.params;
 
@@ -130,7 +140,6 @@ const handleCheckboxChange = (e) => {
   console.log(diasSeleccionados) */
 };
 
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -171,16 +180,7 @@ const handleCheckboxChange = (e) => {
   }, [data.Cod_Edificio]);  
 
   return (
-    <Template
-      title={`${Cod_Seccion} ${Cod_Carrera}-${Cod_Clase}`}
-      titleHeader={`${Cod_Seccion} ${Cod_Carrera}-${Cod_Clase}`}
-      subtitulo={`${Cod_Seccion} ${Cod_Carrera}-${Cod_Clase} ${clase}`}
-    >
-      <InformationToast 
-        message={informationMessage}
-        status={status}
-        setStatus={setStatus}
-      />
+    <>
       <AlertModal
       title="Borrar Sección"
         description="¿Está seguro que desea borrar esta sección?"
@@ -215,6 +215,6 @@ const handleCheckboxChange = (e) => {
             </div>
       )}
 
-    </Template>
+    </>
   );
 }

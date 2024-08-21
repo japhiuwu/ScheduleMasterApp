@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { GetAula } from "../../../../services/edificios";
 import CourseCard from "../../../../components/CourseCard";
-import TemplateTerm from "../../../../components/TemplateTerm";
+import { useAppContext } from "../../../../context/AppContext";
 
 
 export default function Home(props) {
@@ -10,28 +10,23 @@ export default function Home(props) {
   const [loading, setLoading] = useState(true);
   const [periodo, setPeriodo] = useState('Periodo 0');
   const { Cod_Edificio, Num_Aula } = props.params;
+  const { setTitle, setShowMenu, setBanner, setTitleBanner, setDescriptionBanner } = useAppContext();
 
   const storedTerm = localStorage.getItem('selectedTerm');
   const message = sessionStorage.getItem('deleteMessage');
-  
-  if (message) {
-    alert(message); 
-    console.log(message)
-    sessionStorage.removeItem('deleteMessage'); 
-  }
 
     useEffect(() => {
+      setBanner(true)
+      setTitle(`${Cod_Edificio} | Aula ${Num_Aula}`);
+      setTitleBanner(`${Cod_Edificio} | Aula ${Num_Aula}`);
+      setDescriptionBanner(storedTerm);
       GetAula(Cod_Edificio,Num_Aula,storedTerm).then((data) => {
         setData(data);
-        console.log(data);
         setLoading(false);
       });
-    }, [Cod_Edificio,Num_Aula,storedTerm]);
+    }, [setTitle,Cod_Edificio,Num_Aula,storedTerm,setDescriptionBanner,setTitleBanner,setBanner]);
   return (
-    <TemplateTerm
-    title={`${Cod_Edificio} | Aula ${Num_Aula}`}
-    titleHeader={`${Cod_Edificio} | Aula ${Num_Aula}`}
-    description={storedTerm}
+    <
     >
     {data.length > 0 ? (
       data.map((section) => (
@@ -53,6 +48,6 @@ export default function Home(props) {
       
     )}
   
-    </TemplateTerm>
+    </>
   );
 }

@@ -1,14 +1,13 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { GetEdificios } from "../services/edificios";
-import MenuLateral from "../components/MenuLateral";
-import Header from "../components/Header";
+import { useAppContext } from "../context/AppContext";
 import MenuCard from "../components/MenuCard";
-import Template from "../components/Template";
 
 export default function Home() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { setTitle, setSubtitle,setShowMenu } = useAppContext();
 
   useEffect(() => {
     GetEdificios().then((data) => {
@@ -17,8 +16,13 @@ export default function Home() {
     });
   }, []);
 
+  useEffect(() =>{
+    setTitle("Edificios");
+    setSubtitle("Escoja un Edificio");
+  }, [setTitle, setSubtitle])
+
   return (
-    <Template subtitulo={"Escoja un Edificio"}>
+    <>
       {data.map((edificio) => (
         <MenuCard
           key={edificio.Cod_Edificio}
@@ -26,6 +30,6 @@ export default function Home() {
           url={`edificios/${edificio.Cod_Edificio}`}
         />
       ))}
-    </Template>
+    </>
   );
 }
