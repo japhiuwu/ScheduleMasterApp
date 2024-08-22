@@ -22,7 +22,7 @@ export function AppWrapper({ children }) {
     setStatus(status);
     setTimeout(() => {
       setStatus('');
-    }, 5000);
+    }, 3500);
   };
 
   return (

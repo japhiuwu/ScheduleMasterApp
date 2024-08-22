@@ -1,4 +1,6 @@
 import { useState } from "react";
+import {  useCallback } from 'react';
+import { useDropzone } from 'react-dropzone';
 
 const none = () => {}
 
@@ -9,7 +11,15 @@ export default function Home({
     handleEdificioChange, changing,
     docentes, edificios, aulas,
     isCreating, aulaLoading,
+    files = [],
+    UpdateFiles = none
 }){
+    const onDrop = useCallback((acceptedFiles) => {
+        UpdateFiles(acceptedFiles);
+    }, [UpdateFiles]);
+
+    const { getRootProps, getInputProps } = useDropzone({ onDrop });
+
     return (
     <form className="mb">
     <div className="grid gap-6 mb-6 md:grid-cols-2">
@@ -314,21 +324,44 @@ export default function Home({
         </li>
         </ul>
     </div>
-    <div className="mb-6">
-        <label
-        htmlFor="Cupos"
-        className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-        >
-        Cupos
-        </label>
-        <input
-        type="number"
-        id="Cupos"
-        onChange={handleInputChange}
-        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"              
-        value={formData.Cupos}
-        required
-        />
+    <div className="mb-6 flex flex-col">
+        <div>
+            <label
+            htmlFor="Cupos"
+            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            >
+            Cupos
+            </label>
+            <input
+            type="number"
+            id="Cupos"
+            onChange={handleInputChange}
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"              
+            value={formData.Cupos}
+            required
+            />
+        </div>
+        <div>
+            { !isCreating && (<>
+                <label
+                    htmlFor="files"
+                    className="block mt-6 text-sm font-medium text-gray-900 dark:text-white"
+                    >
+                    Portada
+                </label>
+                <div {...getRootProps()} className="mt-2 flex justify-center rounded-md border-2 border-dashed border-gray-300 p-4 text-center">
+                    <input {...getInputProps()} />
+                    <p className="text-sm text-gray-600">Drag & drop some files here, or click to select files</p>
+                </div>
+                <div className="mt-2">
+                    {files.map((file) => (
+                        <p key={file.path} className="text-sm text-gray-600">
+                        {file.path} - {file.size} bytes
+                        </p>
+                    ))}
+                </div>
+            </>)}
+        </div>
     </div>
     </div>
     {!isCreating && (

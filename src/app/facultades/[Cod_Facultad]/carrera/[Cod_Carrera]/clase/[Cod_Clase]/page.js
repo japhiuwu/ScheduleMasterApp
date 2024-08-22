@@ -1,14 +1,14 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { GetClase } from "../../../../../../services/facultades";
+import { GetClaseSeccion } from "../../../../../../services/facultades";
 import CourseCard from "../../../../../../components/CourseCard";
-import TemplateTerm from "../../../../../../components/TemplateTerm";
 import { useAppContext } from "../../../../../../context/AppContext";
+import Skeleton from "@/app/components/Skeleton";
 
 export default function Home(props) {
   const [loading, setLoading] = useState(true);
   const { Cod_Facultad, Cod_Carrera, Cod_Clase } = props.params;
-  const { setTitle, setSubtitle, data, setBanner, setData, setDescriptionBanner, setTitleBanner, setLinkBanner } = useAppContext();
+  const { setTitle, setSubtitle, data, setBanner, setData, setDescriptionBanner, toastMessage, setTitleBanner, setLinkBanner } = useAppContext();
   
   const storedTerm = localStorage.getItem('selectedTerm');
   const message = sessionStorage.getItem('deleteMessage');
@@ -20,26 +20,51 @@ export default function Home(props) {
   }
 
   useEffect(() => {
-    GetClase(Cod_Facultad, Cod_Carrera, Cod_Clase, storedTerm).then((secciones) => {
-      console.log(secciones);
-      setData(secciones);
-      setTitleBanner(secciones[0].Nombre_Clase)
-      setLoading(false);
+    setLoading(true); // Mueve el setLoading aquí si es parte de la lógica de carga
+  
+    GetClaseSeccion(Cod_Facultad, Cod_Carrera, Cod_Clase, storedTerm).then((response) => {
+      if (response.status !== 200) {
+        toastMessage("warning", `${response.error}`);
+      } else {
+        console.log(response.data);
+        setData(response.data);
+        if (response.data.length > 0) {
+          setTitleBanner(response.data[0].Carrera);
+        }
+      }
+      setLoading(false); // Solo después de recibir la respuesta
     });
-  }, [Cod_Facultad, Cod_Carrera, Cod_Clase, storedTerm, setData, setTitleBanner]);
+  }, [setData]); // Lista de dependencias
+  
 
   useEffect(() => {
     setSubtitle('');
     setBanner(true);
+    console.log(data);
     setTitle(`${Cod_Carrera}-${Cod_Clase}`);
-    setTitleBanner();
+    if (data && data.length > 0) {
+      setTitleBanner(data[0].Nombre_Clase);
+    } else {
+      setTitleBanner(`${Cod_Carrera}-${Cod_Clase}`);
+    }
+  
     setDescriptionBanner(`${Cod_Carrera}-${Cod_Clase} | ${storedTerm}`);
     setLinkBanner(`./${Cod_Clase}/seccion`);
-  }, [Cod_Carrera, Cod_Clase, storedTerm, setBanner, setTitle, setSubtitle, setTitleBanner, setDescriptionBanner, setLinkBanner]);
+  }, [data]); // Dependencias necesarias para el efecto
+  
+  
 
   return (
     <>
-      {data && data.length > 0 ? (
+      {loading ? (
+        <>
+          <Skeleton />
+          <Skeleton />
+          <Skeleton />
+          <Skeleton />
+          <Skeleton />
+        </>
+      ) : data.length > 0 ? (
         data.map((section) => (
           <CourseCard
             key={`${section.Cod_Carrera}-${section.Cod_Clase}-${section.Cod_Seccion}`}
@@ -52,7 +77,7 @@ export default function Home(props) {
           />
         ))
       ) : (
-        <p>No hay clases creadas.</p>
+        <p>No hay secciones creadas.</p>
       )}
     </>
   );

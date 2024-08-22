@@ -1,12 +1,14 @@
 'use client';
 import React, { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useAppContext } from "../context/AppContext";
 import GetTerms from "../services/term"
 
 const Header = ({ title, img, initials }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedTerm, setSelectedTerm] = useState("");
+  const { toastMessage, profile } = useAppContext();
 
   useEffect(() => {
     // Retrieve the stored term from local storage
@@ -15,8 +17,13 @@ const Header = ({ title, img, initials }) => {
       setSelectedTerm(storedTerm);
     }
 
-    GetTerms().then((data) => {
-      setData(data);
+    GetTerms().then((response) => {
+      if(response.status != 200){
+        toastMessage("warnign", `${response.error}`);
+      } else{
+        setData(response.data);
+      }
+      console.log(response);
       setLoading(false);
     });
   }, []);
@@ -59,7 +66,7 @@ const Header = ({ title, img, initials }) => {
         {/* IM a la derecha */}
         <div className="flex-1 flex justify-end">
           <Avatar>
-            <AvatarImage src={img} />
+            <AvatarImage src={img ? img : profile} />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
         </div>

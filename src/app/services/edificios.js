@@ -1,6 +1,7 @@
 import settings from "./settings";
 import { useRouter } from "next/navigation";
 import { HTTPError } from "../utils/HttpError";
+import { Validations } from "./extras";
 
 export async function GetEdificios(params) {
     const response = await fetch(`${ settings.domain }/edificios`,{
@@ -13,11 +14,25 @@ export async function GetEdificios(params) {
     });
 
     if (!response.ok) {
+        if (response.status === 401) {
+            // Maneja el error de autorización aquí
+            console.error('Unauthorized: Token inválido o expirado.');
+            localStorage.removeItem('token');
+
+            // Evita el redireccionamiento si ya estás en la página de login
+            if (window.location.pathname !== '/login') {
+                // Redirige al usuario a la página de inicio de sesión
+                window.location.href = '/login';
+            }
+
+            // O puedes devolver algo que indique que hubo un error de autorización
+            return { error: 'Unauthorized' };
+        }
+        console.log(response);
         throw new HTTPError(response);
     }
 
-    const data = await response.json();
-    return data;
+    return Validations(response);
 }
 
 export async function GetAulas(id) {
@@ -30,13 +45,7 @@ export async function GetAulas(id) {
         }
     });
 
-    if (!response.ok) {
-        throw new HTTPError(response);
-        router
-    }
-
-    const data = await response.json();
-    return data;
+    return Validations(response);
 }
 
 export async function GetAula(Cod_Edificio, Num_Aula, term) {
@@ -50,10 +59,5 @@ export async function GetAula(Cod_Edificio, Num_Aula, term) {
         
     });
 
-    if (!response.ok) {
-        throw new HTTPError(response);
-    }
-
-    const data = await response.json();
-    return data;
+    return Validations(response);
 }

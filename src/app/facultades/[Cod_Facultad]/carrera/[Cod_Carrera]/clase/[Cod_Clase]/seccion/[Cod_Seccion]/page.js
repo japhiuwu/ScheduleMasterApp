@@ -42,6 +42,7 @@ export default function Home(props) {
 
   const [formData, setFormData] = useState({});
   const [diasSeleccionados, setDiasSeleccionados] = useState(data.Dias || '');
+  const [aulaLoading, setAulaLoading] = useState(true);
   
 
   const deleteAction = () => {
@@ -159,22 +160,28 @@ const handleCheckboxChange = (e) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const seccion = await GetSeccion(
-          Cod_Facultad,
+        const response = await GetSeccion(
+          storedTerm,
           Cod_Carrera,
           Cod_Clase,
           Cod_Seccion
         );
-        setData(seccion[0] || {});
-        setClase(seccion[0].Nombre_Clase);
-        setFormData(seccion[0] || {});
+        console.log(response)
+        if(response.status != 200){
+          toastMessage('warning', response.error);
+        } 
+
+        setData(response.data[0] || {});
+        setClase(response.data[0].Nombre_Clase);
+        setFormData(response.data[0] || {});
 
         const docentesData = await GetDocentes(Cod_Carrera);
-        setDocentes(docentesData || []);
+        console.log(docentesData)
+        setDocentes(docentesData.data || []);
         const edificiosData = await GetEdificios();
-        setEdificios(edificiosData || []);
+        setEdificios(edificiosData.data || []);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        
       } finally {
         setLoading(false);
       }
@@ -186,14 +193,19 @@ const handleCheckboxChange = (e) => {
   useEffect(() => {
     if (data.Cod_Edificio) {
       GetAulas(data.Cod_Edificio)
-        .then((aulasData) => {
-          setAulas(aulasData || []);
+        .then((response) => {
+          if(response.status != 200){
+            toastMessage("warnign", `${response,error}`);
+          } else{
+            setAulas(response.data || []);
+          }
+          setAulaLoading(false);
         })
         .catch((error) => {
-          console.error("Error fetching aulas:", error);
+          toastMessage("danger", `Error fetching aulas: ${error}`);
         });
     }
-  }, [data.Cod_Edificio]);  
+  }, [data.Cod_Edificio]);
 
   return (
     <>

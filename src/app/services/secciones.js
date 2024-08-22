@@ -1,5 +1,6 @@
 import settings from "./settings";
 import { HTTPError } from "../utils/HttpError";
+import { Validations } from "./extras";
 
 export async function DeleteSection(Cod_Perdiodo, Cod_Carrera, Cod_Clase, Cod_Seccion) {
 
@@ -12,10 +13,7 @@ export async function DeleteSection(Cod_Perdiodo, Cod_Carrera, Cod_Clase, Cod_Se
         }
     });
 
-    if (!response.ok)
-        throw new HTTPError(response);
-    else
-        return response.json();
+    return Validations(response);
 };
 
 export async function UpdateSection(Cod_Periodo, Cod_Carrera, Cod_Clase, Cod_Seccion, Seccion) {
@@ -30,10 +28,7 @@ export async function UpdateSection(Cod_Periodo, Cod_Carrera, Cod_Clase, Cod_Sec
         }
     });
 
-    if (!response.ok)
-        throw new HTTPError(response);
-    else
-        return response.json();
+    return Validations(response);
 };
 
 export async function CreateSection(Seccion) {
@@ -50,9 +45,24 @@ export async function CreateSection(Seccion) {
         }
     });
 
-    if (!response.ok){
-        throw new HTTPError(response);
-        console.log(response)}
-    else
-        return response.json();
+    return Validations(response);
 };
+
+export async function SectionUploadProfile( id, files ){
+
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
+    const response = await fetch(`${ settings.domain }/cards/${id}/files`,{
+        method: 'POST',
+        body: formData,
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            , 'Cache-Control': 'no-cache'
+        }
+    });
+
+    return Validations(response);
+}

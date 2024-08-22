@@ -7,13 +7,16 @@ import { useAppContext } from "../../context/AppContext";
 export default function Home(props) {
   const [loading, setLoading] = useState(true);
   const { Cod_Facultad } = props.params;
-  const { setTitle, setSubtitle, data, setBanner, setData, setTitleBanner } = useAppContext();
+  const { setTitle, setSubtitle, data, setBanner, setData, setTitleBanner, toastMessage } = useAppContext();
 
   useEffect(() => {
-    GetFacultad(Cod_Facultad).then((data) => {
-      setData(data);
+    GetFacultad(Cod_Facultad).then((response) => {
+      if(response.status != 200){
+        toastMessage("warnign", `${response,error}`);
+      } else{
+        setData(response.data);
+      }
       setLoading(false);
-      console.log(data);
     });
   }, [Cod_Facultad, setData]);
 

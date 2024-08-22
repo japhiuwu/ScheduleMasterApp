@@ -5,9 +5,8 @@ import MenuCard from "../components/MenuCard";
 import { useAppContext } from "../context/AppContext";
 
 export default function Home() {
-  const [loading, setLoading] = useState(true);
-
-  const { setTitle, setSubtitle, data, setData } = useAppContext();
+  const { setTitle, setSubtitle, data, setData, toastMessage } = useAppContext();
+  const [loading, setLoading] = useState(data.length > 0 ? false : true);
 
   useEffect(() => {
     setTitle("Facultades");
@@ -15,8 +14,12 @@ export default function Home() {
   }, [setTitle, setSubtitle]);
 
   useEffect(() => {
-    GetFacultades().then((data) => {
-      setData(data);
+    GetFacultades().then((response) => {
+      if(response.status != 200){
+        toastMessage("warnign", `${response,error}`);
+      } else{
+        setData(response.data);
+      }
       setLoading(false);
     });
   }, [setData]);

@@ -7,14 +7,18 @@ import MenuCard from "../components/MenuCard";
 export default function Home() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { setTitle, setSubtitle } = useAppContext();
+  const { setTitle, setSubtitle, toastMessage } = useAppContext();
 
   useEffect(() => {
-    GetEdificios().then((data) => {
-      setData(data);
+    GetEdificios().then((response) => {
+      if(response.status != 200){
+        toastMessage("warnign", `${response.error}`);
+      } else{
+        setData(response.data);
+      }
       setLoading(false); // Cambia esto a false cuando los datos se hayan cargado
     });
-  }, []);
+  }, [toastMessage]);
 
   useEffect(() =>{
     setTitle("Edificios");

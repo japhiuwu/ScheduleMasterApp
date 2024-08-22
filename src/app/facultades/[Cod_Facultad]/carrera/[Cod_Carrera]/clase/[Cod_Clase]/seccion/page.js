@@ -30,6 +30,7 @@ export default function Home(props) {
 
   const [formData, setFormData] = useState({});
   const [diasSeleccionados, setDiasSeleccionados] = useState(data.Dias || '');
+  const [files, setFiles] = useState([]);
   const isEmpty = value => value === null || value === undefined || value === '';
   
 
@@ -47,6 +48,7 @@ export default function Home(props) {
         isEmpty(formData.Cupos)
     ) {
         toastMessage('warning', 'Debe llenar todos los datos')
+        setChanging(false);
         return;
     }
 
@@ -61,22 +63,48 @@ export default function Home(props) {
     console.log(updatedFormData);
 
     // Llamada a la función de creación con los datos actualizados
-    CreateSection(updatedFormData).then(response => {
-        if (response.status !== 200) {
-            console.log(response.status);
-            toastMessage('warning','Error with API call server communication')
-            setChanging(false);
-            return;
+    CreateSection(updatedFormData)
+    .then(response => {
+      if (response.status !== 200) {
+        console.log(response.status);
+        toastMessage('warning', 'Error with API call server communication');
+        setChanging(false);
+        setLoading(false);
+        return;
+      } else {
+        toastMessage('success', 'Se ha creado con éxito');
+        console.log(response.status);
+  
+        if (files.length === 0) {
+          setLoading(false);
+          setTimeout(() => {
+            router.back();
+          }, 5000);
         } else {
-          toastMessage('success','Se ha creado con éxito');
-            console.log(response.status);
-            setTimeout(() => {
+          toastMessage('warning', 'Uploading files to server, please don’t close the window');
+          SectionUploadProfile(id, files)
+            .then(response2 => {
+              setLoading(false);
+              setFiles([]);
+              setTimeout(() => {
                 router.back();
-            }, 5000);
-            return;
+              }, 5000);
+            })
+            .catch(error => {
+              console.log(error);
+              toastMessage('warning', 'Error with API call server communication');
+              setLoading(false);
+            });
         }
+      }
+    })
+    .catch(error => {
+      console.log(error);
+      toastMessage('warning','Error with API call server communication');
+      setLoading(false);
     });
-};
+  }
+  
 
 const handleHoraChange = (e) => {
     handleInputChange(e);
@@ -147,16 +175,15 @@ const handleEdificioChange = (event) => {
         const clase = await GetClase(
           Cod_Facultad,
           Cod_Carrera,
-          Cod_Clase,
-          storedTerm
+          Cod_Clase
         );
         console.log(clase);
-        setClase(clase[0].Nombre_Clase);
+        setClase(clase.data[0].Nombre);
 
-        const docentesData = await GetDocentes(Cod_Carrera);
-        setDocentes(docentesData || []);
-        const edificiosData = await GetEdificios();
-        setEdificios(edificiosData || []);
+        const responseDocentes = await GetDocentes(Cod_Carrera);
+        setDocentes(responseDocentes.data || []);
+        const responseEdificios = await GetEdificios();
+        setEdificios(responseEdificios.data || []);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -165,13 +192,17 @@ const handleEdificioChange = (event) => {
     };
 
     fetchData();
-  }, [Cod_Facultad, Cod_Carrera, Cod_Clase, storedTerm, data.Nombre_Clase]);
+  }, [Cod_Facultad, Cod_Carrera, Cod_Clase, storedTerm, data.Nombre]);
 
   useEffect(() => {
     if (data.Cod_Edificio) {
       GetAulas(data.Cod_Edificio)
-        .then((aulasData) => {
-          setAulas(aulasData || []);
+        .then((response) => {
+          if(response.status != 200){
+            toastMessage("warnign", `${response,error}`);
+          } else{
+            setAulas(response.data || []);
+          }
           setAulaLoading(false);
         })
         .catch((error) => {
@@ -182,6 +213,7 @@ const handleEdificioChange = (event) => {
 
   useEffect(() => {
     setTitle(`${Cod_Carrera}-${Cod_Clase}`);
+    
     setBanner(false);
   })
 
@@ -189,6 +221,7 @@ const handleEdificioChange = (event) => {
     <>
           {!loading && (
         <SectionForm
+        
           formData={formData}
           Cod_Carrera={Cod_Carrera}
           Cod_Clase={Cod_Clase}

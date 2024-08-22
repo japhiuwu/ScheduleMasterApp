@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { GetAula } from "../../../../services/edificios";
 import CourseCard from "../../../../components/CourseCard";
 import { useAppContext } from "../../../../context/AppContext";
+import Skeleton from "@/app/components/Skeleton"
 
 
 export default function Home(props) {
@@ -10,26 +11,39 @@ export default function Home(props) {
   const [loading, setLoading] = useState(true);
   const [periodo, setPeriodo] = useState('Periodo 0');
   const { Cod_Edificio, Num_Aula } = props.params;
-  const { setTitle, setBanner, setTitleBanner, setDescriptionBanner, setSubtitle } = useAppContext();
+  const { setTitle, setBanner, setTitleBanner, setDescriptionBanner, setSubtitle, toastMessage } = useAppContext();
 
   const storedTerm = localStorage.getItem('selectedTerm');
-  const message = sessionStorage.getItem('deleteMessage');
 
-    useEffect(() => {
+    useEffect(()=>{
       setBanner(true)
       setTitle(`${Cod_Edificio} | Aula ${Num_Aula}`);
       setTitleBanner(`${Cod_Edificio} | Aula ${Num_Aula}`);
       setSubtitle('');
       setDescriptionBanner(storedTerm);
-      GetAula(Cod_Edificio,Num_Aula,storedTerm).then((data) => {
-        setData(data);
+    })
+    useEffect(() => {
+      GetAula(Cod_Edificio,Num_Aula,storedTerm).then((response) => {
+        if(response.status != 200){
+          toastMessage("warnign", `${response,error}`);
+        } else{
+          setData(response.data);
+        }
         setLoading(false);
       });
-    }, [setTitle,setSubtitle,Cod_Edificio,Num_Aula,storedTerm,setDescriptionBanner,setTitleBanner,setBanner]);
+    }, [toastMessage,Cod_Edificio,Num_Aula,storedTerm]);
   return (
     <
     >
-    {data.length > 0 ? (
+    {loading ? (
+      <>
+        <Skeleton />
+        <Skeleton />
+        <Skeleton />
+        <Skeleton />
+        <Skeleton />
+      </>
+    ) : data.length > 0 ? (
       data.map((section) => (
         <CourseCard
           key={`${section.Cod_Carrera}-${section.Cod_Clase}-${section.Cod_Seccion}`}

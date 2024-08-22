@@ -1,5 +1,5 @@
 const settings = {
-    domain: "http://127.0.0.1:8000"
+    domain: "api-schedulemaster-dev.azurewebsites.net"
 };
 
 export default settings;

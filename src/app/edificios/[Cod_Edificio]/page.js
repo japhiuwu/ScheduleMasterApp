@@ -8,7 +8,7 @@ export default function Home(props) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const { Cod_Edificio } = props.params;
-  const { setTitle, setSubtitle,setShowMenu } = useAppContext();
+  const { setTitle, setSubtitle,setShowMenu, toastMessage } = useAppContext();
 
   useEffect(() => {
     setTitle(Cod_Edificio);
@@ -17,8 +17,12 @@ export default function Home(props) {
   }, [setTitle, setSubtitle, setShowMenu, Cod_Edificio]);
 
   useEffect(() => {
-    GetAulas(Cod_Edificio).then((data) => {
-      setData(data);
+    GetAulas(Cod_Edificio).then((response) => {
+      if(response.status != 200){
+        toastMessage("warnign", `${response.error}`);
+      } else{
+        setData(response.data);
+      }
       setLoading(false);
     });
   }, [Cod_Edificio]);
