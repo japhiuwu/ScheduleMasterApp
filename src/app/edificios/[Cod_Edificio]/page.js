@@ -31,6 +31,7 @@ export default function Home(props) {
           name={aula.Num_Aula}
           url={`${aula.Cod_Edificio}/aulas/${aula.Num_Aula}`}
           description={`${aula.Cod_Edificio} | ${aula.Tipo}`}
+          loading={loading}
         />
       ))}
     </>

@@ -6,6 +6,7 @@ export async function GetDocentes(Cod_Carrera) {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
+            , 'Authorization': `Bearer ${localStorage.getItem('token')}`
             , 'Cache-Control': 'no-cache'
         }
     });

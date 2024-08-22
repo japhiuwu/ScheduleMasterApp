@@ -2,14 +2,12 @@
 import React, { useEffect, useState } from "react";
 import { GetFacultades } from "../services/facultades";
 import MenuCard from "../components/MenuCard";
-import Template from "../components/Template";
 import { useAppContext } from "../context/AppContext";
 
 export default function Home() {
-  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const { setTitle, setSubtitle } = useAppContext();
+  const { setTitle, setSubtitle, data, setData } = useAppContext();
 
   useEffect(() => {
     setTitle("Facultades");
@@ -21,7 +19,7 @@ export default function Home() {
       setData(data);
       setLoading(false);
     });
-  }, []);
+  }, [setData]);
   
 
   return (
@@ -33,6 +31,7 @@ export default function Home() {
           url={`facultades/${facultad.Cod_Facultad}`}
           description={facultad.descripcion}
           icon={facultad.portada}
+          loading={loading}
         />
       ))}
     </div>

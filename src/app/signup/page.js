@@ -7,7 +7,7 @@ import Image from "next/image";
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
-  const { setShowMenu, setStatus, setInformationMessage, ocultarToast, setProfile, setInitials } = useAppContext();
+  const { setShowMenu, toastMessage} = useAppContext();
   const [sending, setSending] = useState(false);
   const [formData, setFormData] = useState({});
 
@@ -29,7 +29,7 @@ export default function Home() {
   const handleSubmit = (e) => {
     e.preventDefault();
     const wa = SignUpFormValidator(formData.Email, formData.Password, formData.confirmPassword, formData.Primer_Nombre, formData.Primer_Apellido);
-    setInformationMessage(wa);
+    toastMessage("warning", wa);
 
     if (wa.length === 0) {
       console.log(formData)
@@ -37,20 +37,13 @@ export default function Home() {
         Register(formData).then( (response) => {
             if (response.error) {
                 console.log([response.error])
-                setInformationMessage([response.error]);
-                setStatus('warning');
-                ocultarToast();
+                toastMessage('warning', [response.error]);
             } else {
-              setInformationMessage('Se ha registrado con exito');
-              setStatus('success');
-              ocultarToast();
+              toastMessage('success', 'Se ha registrado con exito.');
               Router.push('/login');
             }
         }).catch( (error) => {
-          console.log(error);
-          setInformationMessage(["User already exists"]);
-          setStatus('warning');
-          ocultarToast();
+          toastMessage('warning',"Ya existe este usuario.");
         });
     }
 }

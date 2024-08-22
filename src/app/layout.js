@@ -22,7 +22,7 @@ export default function RootLayout({ children }) {
 }
 
 function LayoutContent({ children }) {
-  const { title, subtitle, showMenu, status, setStatus, informationMessage, setInformationMessage, profile, initials, banner, ocultarToast, titleBanner, descriptionBanner, linkBanner } = useAppContext();
+  const { title, subtitle, showMenu, status, setStatus, informationMessage, profile, initials, banner, ocultarToast, titleBanner, descriptionBanner, linkBanner } = useAppContext();
 
   // Verifica si showMenu es verdadero para mostrar el contenido
   return (

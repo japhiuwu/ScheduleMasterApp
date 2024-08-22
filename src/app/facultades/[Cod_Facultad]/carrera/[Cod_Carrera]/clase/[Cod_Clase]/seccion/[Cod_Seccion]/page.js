@@ -24,7 +24,8 @@ export default function Home(props) {
   const [open, setOpen] = useState(false);
   const [clase, setClase] = useState('');
   const [isCreating, setIsCreating] = useState(false);
-  const { setTitle, setShowMenu, setBanner, setTitleBanner, setDescriptionBanner, setSubtitle } = useAppContext();
+  const [changing, setChanging] = useState(false);
+  const { setTitle, setBanner, toastMessage, setSubtitle } = useAppContext();
 
 /*   title={}
       titleHeader={`${Cod_Seccion} ${Cod_Carrera}-${Cod_Clase}`}
@@ -47,16 +48,12 @@ export default function Home(props) {
     DeleteSection(storedTerm, Cod_Carrera, Cod_Clase, Cod_Seccion).then( (response) => {
         if( response.status != 200 ){ 
             console.log(response.status)   
-            setStatus('warning');        
-            setInformationMessage('Error with API call server communication');
-            setTimeout(() => {
-              setStatus('');
-            }, 5000); 
+            toastMessage('warning', 'Error with API call server communication');   
+            setChanging(false);            
             return;
         }else{
             /* sessionStorage.setItem('message', 'El elemento se ha eliminado con éxito.'); */
-            setStatus('success'); 
-            setInformationMessage('Se ha eliminado con éxito');
+            toastMessage('success', 'Se ha eliminado con éxito'); 
             setTimeout(() => {
               router.back();
             }, 5000); 
@@ -69,31 +66,49 @@ const updateAction = () => {
     UpdateSection(storedTerm, Cod_Carrera, Cod_Clase, Cod_Seccion, formData).then( (response) => {
       if( response.status != 200 ){   
           console.log(response.status)     
-          setStatus('warning');       
-          setInformationMessage('Error with API call server communication');
-          setTimeout(() => {
-            setStatus('');
-          }, 5000); 
+          toastMessage('warning','Error with API call server communication');
+          setChanging(false);       
           return;
       }else{
-          setStatus('success'); 
+        toastMessage('success', 'Se ha actualizado con éxito'); 
           console.log(response.status)
-          setInformationMessage('Se ha actualizado con éxito');
           setTimeout(() => {
+            setSubtitle('');
             router.back();
           }, 5000); 
           return;
       }
+      
   });
   } else{
-    setStatus('warning');       
-    setInformationMessage('Debes escoger al menos un dia');
-    setTimeout(() => {
-      setStatus('');
-    }, 5000); 
+    toastMessage('warning', 'Debes escoger al menos un dia');       
     return;
   }
   
+}
+
+const handleHoraChange = (e) => {
+  handleInputChange(e);
+  const formatTimeToSectionCode = (time) => {
+      if (!time) return '';
+      const [hours, minutes] = time.split(':');
+      const formattedHours = hours.padStart(2, '0');
+      const formattedMinutes = '00';
+      return formattedHours + formattedMinutes;
+    };
+
+    // Actualiza Cod_Seccion si Hora_Inicial cambia
+    const newSectionCode = formatTimeToSectionCode(formData.Hora_Inicial);
+    if (newSectionCode !== formData.Cod_Seccion) {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        Cod_Seccion: newSectionCode
+      }));
+/*         setFormData((prevFormData) => ({
+          ...prevFormData,
+          Hora_Final: formData.Hora_Inicial + 1
+        })); */
+    }
 }
 
 const handleEdificioChange = (event) => {
@@ -114,6 +129,7 @@ const handleDeleteClick = (e) => {
 }
 
 const handleUpdateClick = (e) => {
+  setChanging(true);
   e.preventDefault();
   updateAction();
 }
@@ -199,11 +215,13 @@ const handleCheckboxChange = (e) => {
           handleInputChange={handleInputChange}
           handleCheckboxChange={handleCheckboxChange}
           handleEdificioChange={handleEdificioChange}
+          handleHoraChange={handleHoraChange}
           docentes={docentes}
           edificios={edificios}
           aulas={aulas}
           data={data}
           isCreating={isCreating}
+          changing={changing}
         />
       )}
       {loading && (

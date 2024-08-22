@@ -6,6 +6,7 @@ export async function GetFacultades(params) {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
+            , 'Authorization': `Bearer ${localStorage.getItem('token')}`
             , 'Cache-Control': 'no-cache'
         }
     });
@@ -23,6 +24,7 @@ export async function GetFacultad(Cod_Facultad) {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
+            , 'Authorization': `Bearer ${localStorage.getItem('token')}`
             , 'Cache-Control': 'no-cache'
         }
     });
@@ -40,6 +42,7 @@ export async function GetClases(Cod_Facultad, Cod_Carrera, term) {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
+            , 'Authorization': `Bearer ${localStorage.getItem('token')}`
             , 'Cache-Control': 'no-cache'
         }
     });
@@ -56,8 +59,9 @@ export async function GetClase(Cod_Facultad, Cod_Carrera, Cod_Clase, storedTerm)
     const response = await fetch(`${settings.domain}/facultades/${Cod_Facultad}/carrera/${Cod_Carrera}/clase/${Cod_Clase}/term/${storedTerm}`, {
         method: 'GET',
         headers: {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache',
+            'Content-Type': 'application/json'
+            , 'Authorization': `Bearer ${localStorage.getItem('token')}`
+            , 'Cache-Control': 'no-cache',
         },
     });
 
@@ -74,7 +78,8 @@ export async function GetSeccion(Cod_Facultad, Cod_Carrera, Cod_Clase, Cod_Secci
     const response = await fetch(`${ settings.domain }/facultades/${Cod_Facultad}/carrera/${Cod_Carrera}/clase/${Cod_Clase}/seccion/${Cod_Seccion}`,{
         method: 'GET',
         headers: {
-            'Content-Type': 'application/json'  
+            'Content-Type': 'application/json'
+            , 'Authorization': `Bearer ${localStorage.getItem('token')}`
             , 'Cache-Control': 'no-cache'
         }
     });

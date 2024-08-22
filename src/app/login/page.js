@@ -8,22 +8,23 @@ import { useState } from "react";
 import {LoginFormValidator} from "../utils/utils"
 
 export default function Home() {
-  const { setShowMenu, setStatus, setInformationMessage, ocultarToast, setProfile, setInitials } = useAppContext();
+  const { setShowMenu, toastMessage, setProfile, setInitials } = useAppContext();
   const router = useRouter();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     setShowMenu(false);
   }, [setShowMenu]);
 
   useEffect(() => {
-    console.log('Cleaning localStorage');
     localStorage.removeItem('token');
 }, []);
 
     const handleSubmit = (e) => {
+        setSending(true);
         e.preventDefault();
 
         const warnings = LoginFormValidator(
@@ -37,26 +38,21 @@ export default function Home() {
                 Password: password
             }).then( (response) => {
                 if (response.error) {
-                    setStatus('warning')
-                    setInformationMessage([response.error]);
-                    ocultarToast();
+                  toastMessage('warning',[response.error])
                 } else {
                     localStorage.setItem('token', response.idToken);
-                    console.log(response);
+                    localStorage.setItem('profile', response.profile);
                     /* setInitials(response.first_name); */
                     setProfile(response.profile);
-                    
                     router.push('/');
                 }
             }).catch( (error) => {
-                setStatus('warning')
-                setInformationMessage(['Network response was not ok. ','User or password incorrect']);
-                ocultarToast();
+              toastMessage('warning',['Network response was not ok. ','Datos Incorrectos']);
+              setSending(false);
             })
         }else{
-            setStatus('warning')
-            setInformationMessage(warnings);
-            ocultarToast();
+          toastMessage('warning', warnings);
+          setSending(false);
         }
     }
 
@@ -66,16 +62,11 @@ export default function Home() {
     RedirectM365().then( (response) => {
         if( response.status != 200 ){   
             console.log(response.status)     
-            setStatus('warning');       
-            setInformationMessage('Error with API call server communication');
-            setTimeout(() => {
-              setStatus('');
-            }, 5000); 
+            toastMessage('warning', 'Error with API call server communication');       
             return;
         }else{
-            setStatus('success'); 
+          toastMessage('success', 'Se ha actualizado con éxito'); 
             console.log(response.status)
-            setInformationMessage('Se ha actualizado con éxito');
             setTimeout(() => {
               router.back();
             }, 5000); 
@@ -177,7 +168,7 @@ export default function Home() {
               </div>
             </div>
             <div className="mt-8">
-              <button  onClick={handleSubmit} role="button" className="focus:ring-2 focus:ring-offset-2 focus:ring-indigo-700 text-sm font-semibold leading-none text-white focus:outline-none bg-indigo-700 border rounded hover:bg-indigo-600 py-4 w-full">Log In</button>
+              <button disabled={sending} onClick={handleSubmit} role="button" className="focus:ring-2 focus:ring-offset-2 focus:ring-indigo-700 text-sm font-semibold leading-none text-white focus:outline-none bg-indigo-700 border rounded hover:bg-indigo-600 py-4 w-full">{sending && ('Enviando...')}{!sending && ('Log In')}</button>
             </div>
           </div>
         </div>

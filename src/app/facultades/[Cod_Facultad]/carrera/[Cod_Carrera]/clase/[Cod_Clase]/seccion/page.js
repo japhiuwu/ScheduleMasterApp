@@ -8,7 +8,7 @@ import { CreateSection } from "../../../../../../../services/secciones"
 
 import Template from "../../../../../../../components/Template";
 import SectionForm from "../../../../../../../components/SectionForm";
-import InformationToast from "../../../../../../../components/InformationToast";
+import { useAppContext } from "../../../../../../../context/AppContext";
 
 import { useRouter } from 'next/navigation';
     
@@ -23,10 +23,10 @@ export default function Home(props) {
   const [aulaLoading, setAulaLoading] = useState(true);
   const [clase, setClase] = useState('');
   const [isCreating, setIsCreating] = useState(true);
-  const [status, setStatus] = useState('');
-  const [informationMessage, setInformationMessage] = useState('');
+  const { setTitle, setBanner, setSubtitle, toastMessage } = useAppContext();
   const storedTerm = localStorage.getItem('selectedTerm');
   const { Cod_Facultad, Cod_Carrera, Cod_Clase } = props.params;
+  const [changing, setChanging] = useState(false);
 
   const [formData, setFormData] = useState({});
   const [diasSeleccionados, setDiasSeleccionados] = useState(data.Dias || '');
@@ -34,8 +34,6 @@ export default function Home(props) {
   
 
   const createAction = () => {
-    console.log(formData);
-
     // Verifica si un campo está vacío o no definido
     const isEmpty = value => value === null || value === undefined || value === '';
 
@@ -48,35 +46,30 @@ export default function Home(props) {
         isEmpty(formData.Hora_Final) ||
         isEmpty(formData.Cupos)
     ) {
-        setStatus('warning');
-        setInformationMessage('Debe llenar todos los datos');
-        setTimeout(() => {
-            setStatus('');
-        }, 5000);
+        toastMessage('warning', 'Debe llenar todos los datos')
         return;
     }
 
-    // Llamada a la función de creación si todos los campos están llenos
-    CreateSection(storedTerm, Cod_Carrera, Cod_Clase, formData).then(response => {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
+    // Actualizar formData con los valores necesarios
+    const updatedFormData = {
+        ...formData,
         Cod_Carrera: Cod_Carrera,
         Cod_Clase: Cod_Clase,
         Cod_Periodo: storedTerm
-      }));
-      console.log(formData)
+    };
+
+    console.log(updatedFormData);
+
+    // Llamada a la función de creación con los datos actualizados
+    CreateSection(updatedFormData).then(response => {
         if (response.status !== 200) {
             console.log(response.status);
-            setStatus('warning');
-            setInformationMessage('Error with API call server communication');
-            setTimeout(() => {
-                setStatus('');
-            }, 5000);
+            toastMessage('warning','Error with API call server communication')
+            setChanging(false);
             return;
         } else {
-            setStatus('success');
+          toastMessage('success','Se ha creado con éxito');
             console.log(response.status);
-            setInformationMessage('Se ha creado con éxito');
             setTimeout(() => {
                 router.back();
             }, 5000);
@@ -111,6 +104,7 @@ const handleHoraChange = (e) => {
   
 const handleCreateClick = (e) => {
   e.preventDefault();
+  setChanging(true);
   createAction();
 }
 
@@ -181,24 +175,19 @@ const handleEdificioChange = (event) => {
           setAulaLoading(false);
         })
         .catch((error) => {
-          console.error("Error fetching aulas:", error);
+          toastMessage("danger", `Error fetching aulas: ${error}`);
         });
     }
-  }, [data.Cod_Edificio]);
+  }, [data.Cod_Edificio, toastMessage]);
+
+  useEffect(() => {
+    setTitle(`${Cod_Carrera}-${Cod_Clase}`);
+    setBanner(false);
+  })
 
   return (
-    <Template
-      title={`${Cod_Carrera}-${Cod_Clase}`}
-      titleHeader={`${Cod_Carrera}-${Cod_Clase}`}
-      subtitulo={`${Cod_Carrera}-${Cod_Clase} ${clase}`}
-    >
-      <InformationToast 
-        message={informationMessage}
-        status={status}
-        setStatus={setStatus}
-      />
-
-      {!loading && (
+    <>
+          {!loading && (
         <SectionForm
           formData={formData}
           Cod_Carrera={Cod_Carrera}
@@ -214,6 +203,7 @@ const handleEdificioChange = (event) => {
           data={data}
           isCreating={isCreating}
           aulaLoading={aulaLoading}
+          changing={changing}
         />
       )}
       {loading && (
@@ -224,7 +214,6 @@ const handleEdificioChange = (event) => {
               <p className="h-2 bg-gray-300 rounded-full w-[320px] mb-2.5" />
             </div>
       )}
-
-    </Template>
+    </>
   );
 }

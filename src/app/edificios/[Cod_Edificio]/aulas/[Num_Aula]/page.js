@@ -10,7 +10,7 @@ export default function Home(props) {
   const [loading, setLoading] = useState(true);
   const [periodo, setPeriodo] = useState('Periodo 0');
   const { Cod_Edificio, Num_Aula } = props.params;
-  const { setTitle, setShowMenu, setBanner, setTitleBanner, setDescriptionBanner } = useAppContext();
+  const { setTitle, setBanner, setTitleBanner, setDescriptionBanner, setSubtitle } = useAppContext();
 
   const storedTerm = localStorage.getItem('selectedTerm');
   const message = sessionStorage.getItem('deleteMessage');
@@ -19,12 +19,13 @@ export default function Home(props) {
       setBanner(true)
       setTitle(`${Cod_Edificio} | Aula ${Num_Aula}`);
       setTitleBanner(`${Cod_Edificio} | Aula ${Num_Aula}`);
+      setSubtitle('');
       setDescriptionBanner(storedTerm);
       GetAula(Cod_Edificio,Num_Aula,storedTerm).then((data) => {
         setData(data);
         setLoading(false);
       });
-    }, [setTitle,Cod_Edificio,Num_Aula,storedTerm,setDescriptionBanner,setTitleBanner,setBanner]);
+    }, [setTitle,setSubtitle,Cod_Edificio,Num_Aula,storedTerm,setDescriptionBanner,setTitleBanner,setBanner]);
   return (
     <
     >

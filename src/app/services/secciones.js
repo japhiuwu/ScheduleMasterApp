@@ -8,7 +8,7 @@ export async function DeleteSection(Cod_Perdiodo, Cod_Carrera, Cod_Clase, Cod_Se
         headers: {
             'Content-Type': 'application/json'
             , 'Cache-Control': 'no-cache'
-            //, 'Authorization': `Bearer ${localStorage.getItem('token')}`
+            , 'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
     });
 
@@ -26,7 +26,7 @@ export async function UpdateSection(Cod_Periodo, Cod_Carrera, Cod_Clase, Cod_Sec
         headers: {
             'Content-Type': 'application/json'
             , 'Cache-Control': 'no-cache'
-            //, 'Authorization': `Bearer ${localStorage.getItem('token')}`
+            , 'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
     });
 
@@ -38,14 +38,14 @@ export async function UpdateSection(Cod_Periodo, Cod_Carrera, Cod_Clase, Cod_Sec
 
 export async function CreateSection(Seccion) {
     Seccion.Portada ='';
-    Seccion.Dias = '';
+    Seccion.Dias = 'LuMiVi';
     console.log(JSON.stringify(Seccion));
     const response = await fetch(`${ settings.domain }/seccion`,{
         method: 'POST',
         body: JSON.stringify(Seccion),
         headers: {
             'Content-Type': 'application/json'
-            //, 'Authorization': `Bearer ${localStorage.getItem('token')}`
+            , 'Authorization': `Bearer ${localStorage.getItem('token')}`
             , 'Cache-Control': 'no-cache'
         }
     });

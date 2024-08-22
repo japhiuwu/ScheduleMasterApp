@@ -1,4 +1,5 @@
 import settings from "./settings";
+import { useRouter } from "next/navigation";
 import { HTTPError } from "../utils/HttpError";
 
 export async function GetEdificios(params) {
@@ -6,6 +7,7 @@ export async function GetEdificios(params) {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
+            , 'Authorization': `Bearer ${localStorage.getItem('token')}`
             , 'Cache-Control': 'no-cache'
         }
     });
@@ -23,12 +25,14 @@ export async function GetAulas(id) {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
+            , 'Authorization': `Bearer ${localStorage.getItem('token')}`
             , 'Cache-Control': 'no-cache'
         }
     });
 
     if (!response.ok) {
         throw new HTTPError(response);
+        router
     }
 
     const data = await response.json();
@@ -40,6 +44,7 @@ export async function GetAula(Cod_Edificio, Num_Aula, term) {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
+            , 'Authorization': `Bearer ${localStorage.getItem('token')}`
             , 'Cache-Control': 'no-cache'
         }
         
